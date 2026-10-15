@@ -79,9 +79,14 @@ public class JoinRequestController {
         // リダイレクトされてきた登録申請成功のメッセージを、paramFormにセットする
         paramForm.setMessage(joinOkMessage);
 
-        /*
-         * TODO ➊ 初期表示情報取得結果に応じて、以下の条件文を完成させる。
-         */
+        if (responseForm.isEmpty()) {
+            String notRequestClubMessage = messageSource.getMessage(
+                    "notRrequestClubMessage", null, Locale.getDefault());
+            mav.addObject("notRrequestClubMessage", notRequestClubMessage);
+        } else {
+            mav.addObject("joinRequestList", responseForm);
+        }
+        mav.addObject("joinOkMessage", paramForm.getMessage());
 
         mav.addObject("leaderClubId", leaderClubId);
 
@@ -115,9 +120,15 @@ public class JoinRequestController {
 
         try {
             boolean result = joinRequestService.insertJoinRequest(joinRequestSaveDto);
-            /*
-             * TODO ➋ インサートの成功、失敗に応じて、処理を変更する。
-             */
+            if (result) {
+                String joinRequestCompleteMessage = messageSource.getMessage(
+                        "joinRequestCompleteMessage", null, Locale.getDefault());
+                paramForm.setMessage(joinRequestCompleteMessage);
+                redirectAttributes.addFlashAttribute("joinOkMessage", paramForm.getMessage());
+                mav.setViewName("redirect:/joinRequest");
+            } else {
+                mav.setViewName("error");
+            }
 
         } catch (Exception e) {
             mav.setViewName("error");
